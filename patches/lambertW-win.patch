@@ -1,0 +1,137 @@
+diff --git a/FukushimaLambertW.cc b/FukushimaLambertW.cc
+index 2fca8ad..05e9f81 100644
+--- a/FukushimaLambertW.cc
++++ b/FukushimaLambertW.cc
+@@ -23,6 +23,8 @@
+   transcendental function evaluations", J. Comp. Appl. Math. 244 (2013) 77-89.
+ */
+ 
++#define _USE_MATH_DEFINES // for C++
++
+ #include <FukushimaLambertW.h>
+ #include <cmath>
+ #include <limits>
+diff --git a/LambertW.cc b/LambertW.cc
+index be5cad5..f79ee70 100644
+--- a/LambertW.cc
++++ b/LambertW.cc
+@@ -17,6 +17,8 @@
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
++#define _USE_MATH_DEFINES // for C++
++
+ #include <cmath>
+ #include "Horner.h"
+ 
+diff --git a/lambertw.cxx b/lambertw.cxx
+index 09f4f42..c67949d 100644
+--- a/lambertw.cxx
++++ b/lambertw.cxx
+@@ -45,6 +45,8 @@
+ 
+ */
+ 
++#define _USE_MATH_DEFINES // for C++
++
+ #include <LambertW.h>
+ #include <FukushimaLambertW.h>
+ #include <iostream>
+diff --git a/test_accuracy.cxx b/test_accuracy.cxx
+index f168f3d..8ec2fa3 100644
+--- a/test_accuracy.cxx
++++ b/test_accuracy.cxx
+@@ -17,6 +17,8 @@
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
++#define _USE_MATH_DEFINES // for C++
++
+ #include <LambertW.h>
+ #include <FukushimaLambertW.h>
+ #include <iostream>
+diff --git a/unistd.h b/unistd.h
+new file mode 100644
+index 0000000..2a1d72e
+--- /dev/null
++++ b/unistd.h
+@@ -0,0 +1,78 @@
++#include <string.h>
++#include <stdio.h>
++
++int opterr = 1, /* if error message should be printed */
++    optind = 1, /* index into parent argv vector */
++    optopt,     /* character checked for validity */
++    optreset;   /* reset getopt */
++char *optarg;   /* argument associated with option */
++
++#define BADCH (int)'?'
++#define BADARG (int)':'
++#define EMSG ""
++
++/*
++ * getopt --
++ *      Parse argc/argv argument vector.
++ */
++int getopt(int nargc, char *const nargv[], const char *ostr)
++{
++    static char *place = EMSG; /* option letter processing */
++    const char *oli;           /* option letter list index */
++
++    if (optreset || !*place)
++    { /* update scanning pointer */
++        optreset = 0;
++        if (optind >= nargc || *(place = nargv[optind]) != '-')
++        {
++            place = EMSG;
++            return (-1);
++        }
++        if (place[1] && *++place == '-')
++        { /* found "--" */
++            ++optind;
++            place = EMSG;
++            return (-1);
++        }
++    } /* option letter okay? */
++    if ((optopt = (int)*place++) == (int)':' ||
++        !(oli = strchr(ostr, optopt)))
++    {
++        /*
++         * if the user didn't specify '-' as an option,
++         * assume it means -1.
++         */
++        if (optopt == (int)'-')
++            return (-1);
++        if (!*place)
++            ++optind;
++        if (opterr && *ostr != ':')
++            (void)printf("illegal option -- %c\n", optopt);
++        return (BADCH);
++    }
++    if (*++oli != ':')
++    { /* don't need argument */
++        optarg = NULL;
++        if (!*place)
++            ++optind;
++    }
++    else
++    {               /* need an argument */
++        if (*place) /* no white space */
++            optarg = place;
++        else if (nargc <= ++optind)
++        { /* no arg */
++            place = EMSG;
++            if (*ostr == ':')
++                return (BADARG);
++            if (opterr)
++                (void)printf("option requires an argument -- %c\n", optopt);
++            return (BADCH);
++        }
++        else /* white space */
++            optarg = nargv[optind];
++        place = EMSG;
++        ++optind;
++    }
++    return (optopt); /* dump back option letter */
++}
+\ No newline at end of file
